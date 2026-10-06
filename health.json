@@ -1,1 +1,1 @@
-{"v":1,"t":1791108916,"mb":2.2,"n":{"synced":1,"pending":2,"failed":0},"failed":[],"pending":[["1290","Shropshire Lad",0,0],["271","Dracula",0,0]],"synced":[["19588","Book 19588"]],"clean":{"live":false,"days":40,"dirs":[],"runs":0}}
+{"v":1,"t":1791292664,"mb":2.2,"n":{"synced":1,"pending":2,"failed":1},"failed":[["8143","Sandmann","Stopped without finishing",1791135627]],"pending":[["1290","Shropshire Lad",0,0],["271","Dracula",0,0]],"synced":[["19588","Adventures of Sammy Jay (Version 2)"]],"clean":{"live":false,"days":40,"dirs":[],"runs":0}}
