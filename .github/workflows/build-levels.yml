@@ -1,0 +1,42 @@
+name: Build levels
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4 * * 0"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-levels
+  cancel-in-progress: false
+
+jobs:
+  levels:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install wordfreq
+        run: pip install wordfreq
+
+      - name: Score books
+        run: python build_levels.py --catalog catalog.json --out levels.json --limit 3000
+
+      - name: Commit levels.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add levels.json
+          git diff --cached --quiet || git commit -m "Update levels.json"
+          for i in 1 2 3; do
+            git pull --rebase && git push && exit 0
+            sleep 5
+          done
+          exit 1

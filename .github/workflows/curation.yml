@@ -1,0 +1,19 @@
+name: Build curation
+on:
+  schedule: [{ cron: "30 4 * * *" }]
+  workflow_dispatch:
+  push:
+    paths: [editors.json, build_curation.py]
+permissions: { contents: write }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: python build_curation.py
+      - run: |
+          git config user.name "curation-bot"; git config user.email "bot@users.noreply.github.com"
+          git add curation.json curation_state.json
+          git diff --cached --quiet || (git commit -m "Update curation" && git push)

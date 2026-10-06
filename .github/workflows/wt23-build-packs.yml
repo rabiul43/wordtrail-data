@@ -1,0 +1,46 @@
+# Packs pre-synced books into single compressed files (wt_packs/<id>.json.gz).
+# Put this file at: .github/workflows/wt23-build-packs.yml
+# Put the script at the repo root:  wt23_build_packs.py
+name: WT23 build sync packs
+
+on:
+  schedule:
+    - cron: "17 3 * * *"        # every day at 03:17 UTC
+  workflow_dispatch: {}          # also runnable by hand from the Actions tab
+  push:
+    paths:
+      - "data/**"                # new or changed sync files
+      - "wt23_popular_ids.txt"
+      - "wt23_build_packs.py"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wt23-build-packs
+  cancel-in-progress: false
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build packs
+        run: python wt23_build_packs.py --data data --out wt_packs --catalog catalog.json --ids wt23_popular_ids.txt
+
+      - name: Commit changes
+        run: |
+          git config user.name  "wt23-pack-bot"
+          git config user.email "wt23-pack-bot@users.noreply.github.com"
+          git add wt_packs
+          if git diff --cached --quiet; then
+            echo "No pack changes."
+          else
+            git commit -m "wt23: update sync packs [skip ci]"
+            git push
+          fi

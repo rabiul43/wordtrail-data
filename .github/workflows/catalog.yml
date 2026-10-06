@@ -1,0 +1,34 @@
+name: Refresh catalog
+on:
+  schedule: [{cron: '0 3 * * 1'}]
+  workflow_dispatch:
+    inputs:
+      start:
+        description: 'Start offset (leave empty to continue automatically)'
+        required: false
+        default: ''
+permissions: {contents: write, actions: write}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - id: run
+        env: {START: '${{ inputs.start }}'}
+        run: python3 build_catalog.py
+      - name: Save raw backup to a Release
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          gh release view raw-backup >/dev/null 2>&1 || gh release create raw-backup --title "Raw LibriVox backup" --notes "Full copies of the LibriVox catalog data, in parts."
+          gh release upload raw-backup raw-*.json.gz --clobber
+      - name: Commit catalog and details
+        run: |
+          git config user.name "catalog-bot"; git config user.email "bot@users.noreply.github.com"
+          git add catalog.json details; git commit -m "Refresh catalog" || exit 0
+          for i in 1 2 3 4 5; do git pull --rebase && git push && exit 0; sleep 5; done
+          exit 1
+      - name: Continue automatically if not finished
+        if: steps.run.outputs.more == 'true'
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: gh workflow run catalog.yml

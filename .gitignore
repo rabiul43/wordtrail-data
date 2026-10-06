@@ -1,0 +1,5 @@
+raw-*.json.gz
+*.tmp
+__pycache__/
+align_resync.json
+.DS_Store

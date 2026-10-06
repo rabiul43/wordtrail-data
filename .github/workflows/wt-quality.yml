@@ -1,0 +1,36 @@
+name: wt-quality
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 3 * * 0"
+permissions:
+  contents: write
+concurrency:
+  group: wt-quality
+  cancel-in-progress: false
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Measure audio quality
+        run: python wt_quality.py
+        env:
+          WT_QUALITY_LIMIT: "30"
+      - name: Rebuild versions.json with the new scores
+        run: python wt_smart_index.py
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add quality.json versions.json search.json gutenberg_stats.json
+          if git diff --cached --quiet; then echo "nothing to commit"; exit 0; fi
+          git commit -m "audio quality scores"
+          git pull --rebase origin main
+          git push

@@ -1,0 +1,42 @@
+name: Build vocabulary
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 8 * * 0"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-vocab
+  cancel-in-progress: false
+
+jobs:
+  vocab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install wordfreq
+        run: pip install wordfreq
+
+      - name: Build word lists
+        run: python build_vocab.py --limit 1500
+
+      - name: Commit results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add vocab
+          git diff --cached --quiet || git commit -m "Update vocabulary lists"
+          for i in 1 2 3; do
+            git pull --rebase && git push && exit 0
+            sleep 5
+          done
+          exit 1

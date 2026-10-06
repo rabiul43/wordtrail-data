@@ -1,0 +1,57 @@
+name: sync
+on:
+  issues:
+    types: [opened]
+permissions:
+  contents: write
+  issues: write
+  actions: read
+concurrency:
+  group: wt-${{ github.event.issue.title }}
+  cancel-in-progress: false
+jobs:
+  run:
+    if: github.event.issue.user.login == github.repository_owner && startsWith(github.event.issue.title, 'sync ')
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Limit parallel sync jobs
+        id: guard
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          n=$(gh api "repos/$GH_REPO/actions/workflows/sync.yml/runs?status=in_progress&per_page=50" --jq '.total_count' || echo 0)
+          echo "sync jobs running: $n"
+          if [ "$n" -gt 2 ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            gh issue comment ${{ github.event.issue.number }} --body "Too many syncs running. Open the request again in a few hours."
+          fi
+      - if: steps.guard.outputs.skip != 'true'
+        uses: actions/checkout@v4
+      - if: steps.guard.outputs.skip != 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - if: steps.guard.outputs.skip != 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/torch
+          key: torch-w2v2-base-960h
+      - if: steps.guard.outputs.skip != 'true'
+        run: pip install faster-whisper requests
+      - if: steps.guard.outputs.skip != 'true'
+        run: pip install torch==2.5.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+      - if: steps.guard.outputs.skip != 'true'
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          python process.py
+        env:
+          TITLE: ${{ github.event.issue.title }}
+          BODY: ${{ github.event.issue.body }}
+      - if: always()
+        run: gh issue close ${{ github.event.issue.number }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
