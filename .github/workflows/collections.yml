@@ -1,0 +1,40 @@
+name: Build collections
+
+# Rebuilds curation.json (the Collections shelves) once a week.
+on:
+  schedule:
+    - cron: '17 3 * * 1'     # every Monday, 03:17 UTC
+  workflow_dispatch:         # also gives you a "Run workflow" button in the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-collections
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Build curation.json
+        run: python build_collections.py --catalog catalog.json --out curation.json
+
+      - name: Save curation.json if it changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add curation.json
+          if git diff --cached --quiet; then
+            echo "curation.json did not change, nothing to commit."
+          else
+            git commit -m "Update collections"
+            git push
+          fi
