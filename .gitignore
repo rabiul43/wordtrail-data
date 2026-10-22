@@ -3,3 +3,5 @@ raw-*.json.gz
 __pycache__/
 align_resync.json
 .DS_Store
+music/_inbox/
+music/_raw/

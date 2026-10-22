@@ -1,0 +1,226 @@
+{
+  "v": 1,
+  "moods": {
+    "peace": [
+      {
+        "f": "peace/evening.mp3",
+        "dur": 186.25,
+        "lk": [
+          0.0,
+          160.926
+        ],
+        "lufs": -18.4,
+        "by": "Kevin MacLeod",
+        "lic": "CC-BY"
+      },
+      {
+        "f": "peace/immersed.mp3",
+        "dur": 248.97,
+        "lk": [
+          0.0,
+          221.047
+        ],
+        "lufs": -18.4,
+        "by": "Kevin MacLeod",
+        "lic": "CC-BY"
+      },
+      {
+        "f": "peace/meditation-impromptu-01.mp3",
+        "dur": 212.79,
+        "lk": [
+          0.0,
+          182.793
+        ],
+        "lufs": -18.5,
+        "by": "Kevin MacLeod",
+        "lic": "CC-BY"
+      },
+      {
+        "f": "peace/meditation-impromptu-03.mp3",
+        "dur": 255.22,
+        "lk": [
+          0.0,
+          244.158
+        ],
+        "lufs": -18.6,
+        "by": "Kevin MacLeod",
+        "lic": "CC-BY"
+      },
+      {
+        "f": "peace/moonstone.mp3",
+        "dur": 255.14,
+        "lk": [
+          0.0,
+          247.128
+        ],
+        "lufs": -18.3,
+        "by": "Kevin MacLeod",
+        "lic": "CC-BY"
+      },
+      {
+        "f": "peace/morning.mp3",
+        "dur": 153.31,
+        "lk": [
+          0.0,
+          129.76
+        ],
+        "lufs": -18.4,
+        "by": "Kevin MacLeod",
+        "lic": "CC-BY"
+      },
+      {
+        "f": "peace/transition-one.mp3",
+        "dur": 40.96,
+        "lk": [
+          0.0,
+          13.359
+        ],
+        "lufs": -18.4,
+        "by": "Kevin MacLeod",
+        "lic": "CC-BY"
+      }
+    ],
+    "merry": [
+      {
+        "f": "merry/merry-go-slower.mp3",
+        "dur": 131.29,
+        "lk": [
+          0.0,
+          103.94
+        ],
+        "lufs": -18.4,
+        "by": "Kevin MacLeod",
+        "lic": "CC-BY"
+      },
+      {
+        "f": "merry/merry-go.mp3",
+        "dur": 120.42,
+        "lk": [
+          0.0,
+          91.224
+        ],
+        "lufs": -18.4,
+        "by": "Kevin MacLeod",
+        "lic": "CC-BY"
+      }
+    ],
+    "dread": [
+      {
+        "f": "dread/scp-x1x.mp3",
+        "dur": 351.74,
+        "lk": [
+          0.0,
+          343.179
+        ],
+        "lufs": -18.4,
+        "by": "Kevin MacLeod",
+        "lic": "CC-BY"
+      },
+      {
+        "f": "dread/the-dread.mp3",
+        "dur": 197.67,
+        "lk": [
+          0.0,
+          174.391
+        ],
+        "lufs": -18.6,
+        "by": "Kevin MacLeod",
+        "lic": "CC-BY"
+      }
+    ],
+    "danger": [
+      {
+        "f": "danger/dangerous.mp3",
+        "dur": 58.17,
+        "lk": [
+          0.0,
+          45.267
+        ],
+        "lufs": -18.2,
+        "by": "Kevin MacLeod",
+        "lic": "CC-BY"
+      },
+      {
+        "f": "danger/ibn-al-noor.mp3",
+        "dur": 218.23,
+        "lk": [
+          0.0,
+          188.232
+        ],
+        "lufs": -18.4,
+        "by": "Kevin MacLeod",
+        "lic": "CC-BY"
+      },
+      {
+        "f": "danger/mistake-the-getaway.mp3",
+        "dur": 122.62,
+        "lk": [
+          0.0,
+          95.49
+        ],
+        "lufs": -18.4,
+        "by": "Kevin MacLeod",
+        "lic": "CC-BY"
+      },
+      {
+        "f": "danger/not-as-it-seems.mp3",
+        "dur": 100.68,
+        "lk": [
+          0.0,
+          80.397
+        ],
+        "lufs": -18.4,
+        "by": "Kevin MacLeod",
+        "lic": "CC-BY"
+      }
+    ],
+    "sorrow": [
+      {
+        "f": "sorrow/news-of-sorrow.mp3",
+        "dur": 52.87,
+        "lk": [
+          0.0,
+          38.415
+        ],
+        "lufs": -18.5,
+        "by": "Kevin MacLeod",
+        "lic": "CC-BY"
+      },
+      {
+        "f": "sorrow/promises-to-keep.mp3",
+        "dur": 304.07,
+        "lk": [
+          0.0,
+          281.112
+        ],
+        "lufs": -18.5,
+        "by": "Kevin MacLeod",
+        "lic": "CC-BY"
+      }
+    ],
+    "neutral": [
+      {
+        "f": "neutral/evening.mp3",
+        "dur": 186.25,
+        "lk": [
+          0.0,
+          160.926
+        ],
+        "lufs": -18.4,
+        "by": "Kevin MacLeod",
+        "lic": "CC-BY"
+      },
+      {
+        "f": "neutral/morning.mp3",
+        "dur": 153.31,
+        "lk": [
+          0.0,
+          129.76
+        ],
+        "lufs": -18.4,
+        "by": "Kevin MacLeod",
+        "lic": "CC-BY"
+      }
+    ]
+  }
+}
