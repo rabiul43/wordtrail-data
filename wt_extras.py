@@ -2,11 +2,12 @@
 """wt_extras.py - find the extra spoken parts (LibriVox notice, book/author line, reader credits)
 in Wordtrail timing packs, using the pack's own word-match marks (q), and write skip times.
 
-Run:   python wt_extras.py PACK_DIR OUT_DIR [--pad-a SECS] [--pad-b SECS]
+Run:   python wt_extras.py PACK_DIR OUT_DIR [--pad-a SECS] [--pad-b SECS] [--resume]
   PACK_DIR    folder with timing-*.json.gz (or *.json) files
   OUT_DIR     gets extras-<book id>.json per book, and extras_report.txt (read it by eye)
   --pad-a     seconds to trim from the start of each cut (default 0.05)
   --pad-b     seconds to trim from the end of each cut (default 0.10)
+  --resume    skip books whose extras file already exists in OUT_DIR (safe to re-run after a crash)
 
 How it decides (all from the pack, no audio, no GPU):
   q has one mark per spoken word: '0' = the word is NOT in the book text, anything else = matched.
@@ -144,14 +145,23 @@ def analyse(tr, pad_a=PAD_A, pad_b=PAD_B):
 
     return {'cuts': cuts, 'why': 'ok'}
 
-def run(pack_dir, out_dir, pad_a=PAD_A, pad_b=PAD_B):
+def run(pack_dir, out_dir, pad_a=PAD_A, pad_b=PAD_B, resume=False):
     os.makedirs(out_dir, exist_ok=True)
+    all_fns = sorted(fn for fn in os.listdir(pack_dir)
+                     if fn.endswith('.json.gz') or fn.endswith('.json'))
+    total = len(all_fns)
+    done = skipped = 0
     rep = []
-    for fn in sorted(os.listdir(pack_dir)):
-        if not (fn.endswith('.json.gz') or fn.endswith('.json')): continue
+    for fn in all_fns:
         p = os.path.join(pack_dir, fn)
         d = json.loads((gzip.open(p).read() if fn.endswith('.gz') else open(p, 'rb').read()).decode())
         bid = str(d.get('bid') or re.sub(r'\D', '', fn))
+        out_path = os.path.join(out_dir, 'extras-%s.json' % bid)
+        if resume and os.path.exists(out_path):
+            skipped += 1
+            if skipped <= 3 or skipped % 100 == 0:
+                print('skip %s (%d/%d)' % (bid, skipped + done, total))
+            continue
         out = {'bid': bid, 'v': 1, 'tracks': {}}
         rep.append('=== %s  %s' % (bid, d.get('title') or ''))
         for k in sorted(d['tracks'], key=lambda x: int(x)):
@@ -175,9 +185,13 @@ def run(pack_dir, out_dir, pad_a=PAD_A, pad_b=PAD_B):
                     rep.append('        !! WARNING: head cut is long (%.1f s), verify' % c['b'])
                 if c['type'] == 'tail' and total_dur > 0 and c['a'] < 0.6 * total_dur:
                     rep.append('        !! WARNING: tail starts early (%.0f%% through track), verify' % (100.0 * c['a'] / total_dur))
-        json.dump(out, open(os.path.join(out_dir, 'extras-%s.json' % bid), 'w'), separators=(',', ':'))
+        json.dump(out, open(out_path, 'w'), separators=(',', ':'))
+        done += 1
+        if done % 50 == 0 or done + skipped == total:
+            print('processed %d / %d  (skipped %d)' % (done, total - skipped, skipped))
     open(os.path.join(out_dir, 'extras_report.txt'), 'w').write('\n'.join(rep))
-    print('done:', len(rep), 'report lines ->', os.path.join(out_dir, 'extras_report.txt'))
+    print('done: %d processed, %d skipped, %d report lines -> %s'
+          % (done, skipped, len(rep), os.path.join(out_dir, 'extras_report.txt')))
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -187,5 +201,7 @@ if __name__ == '__main__':
                     help='seconds to trim from cut start (default %(default)s)')
     ap.add_argument('--pad-b', type=float, default=PAD_B, metavar='SECS',
                     help='seconds to trim from cut end (default %(default)s)')
+    ap.add_argument('--resume', action='store_true',
+                    help='skip books whose extras file already exists in OUT_DIR')
     args = ap.parse_args()
-    run(args.pack_dir, args.out_dir, pad_a=args.pad_a, pad_b=args.pad_b)
+    run(args.pack_dir, args.out_dir, pad_a=args.pad_a, pad_b=args.pad_b, resume=args.resume)
