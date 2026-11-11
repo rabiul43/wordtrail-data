@@ -148,13 +148,22 @@ def analyse(tr, pad_a=PAD_A, pad_b=PAD_B):
 def run(pack_dir, out_dir, pad_a=PAD_A, pad_b=PAD_B, resume=False):
     os.makedirs(out_dir, exist_ok=True)
     all_fns = sorted(fn for fn in os.listdir(pack_dir)
-                     if fn.endswith('.json.gz') or fn.endswith('.json'))
+                     if (fn.endswith('.json.gz') or fn.endswith('.json')) and fn != 'index.json')
     total = len(all_fns)
     done = skipped = 0
     rep = []
+    rep_path = os.path.join(out_dir, 'extras_report.txt')
+    if not resume:
+        open(rep_path, 'w').close()   # fresh run: start an empty report; with --resume new books are appended
+    nrep = 0
     for fn in all_fns:
         p = os.path.join(pack_dir, fn)
-        d = json.loads((gzip.open(p).read() if fn.endswith('.gz') else open(p, 'rb').read()).decode())
+        try:
+            d = json.loads((gzip.open(p).read() if fn.endswith('.gz') else open(p, 'rb').read()).decode())
+        except Exception as e:
+            print('skip unreadable %s: %s' % (fn, e)); continue
+        if not isinstance(d, dict) or not isinstance(d.get('tracks'), dict):   # e.g. index.json: not a pack
+            print('skip %s: not a timing pack' % fn); continue
         bid = str(d.get('bid') or re.sub(r'\D', '', fn))
         out_path = os.path.join(out_dir, 'extras-%s.json' % bid)
         if resume and os.path.exists(out_path):
@@ -186,10 +195,12 @@ def run(pack_dir, out_dir, pad_a=PAD_A, pad_b=PAD_B, resume=False):
                 if c['type'] == 'tail' and total_dur > 0 and c['a'] < 0.6 * total_dur:
                     rep.append('        !! WARNING: tail starts early (%.0f%% through track), verify' % (100.0 * c['a'] / total_dur))
         json.dump(out, open(out_path, 'w'), separators=(',', ':'))
+        with open(rep_path, 'a') as rf:   # written per book, so a crash or Kaggle disconnect keeps the report so far
+            rf.write('\n'.join(rep[nrep:]) + '\n')
+        nrep = len(rep)
         done += 1
         if done % 50 == 0 or done + skipped == total:
             print('processed %d / %d  (skipped %d)' % (done, total - skipped, skipped))
-    open(os.path.join(out_dir, 'extras_report.txt'), 'w').write('\n'.join(rep))
     print('done: %d processed, %d skipped, %d report lines -> %s'
           % (done, skipped, len(rep), os.path.join(out_dir, 'extras_report.txt')))
 
